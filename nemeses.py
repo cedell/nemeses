@@ -115,7 +115,7 @@ def find_strangers():
 def host_scanner():
     # Collect information for all online hosts
     online_hosts = {}
-    system_command = 'sudo arp-scan --verbose --retry=10 192.168.1.100-192.168.1.150'
+    system_command = 'sudo arp-scan --verbose --retry=10 --localnet'
     p = subprocess.Popen(system_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     for line in io.TextIOWrapper(p.stdout, encoding="utf-8"):
