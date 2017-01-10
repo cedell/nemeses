@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 import datetime
-import io
-import subprocess
 import time
 import re
 import sys
 from scapy.all import srp
 from scapy.all import Ether, ARP, conf, arping
+# import io
+# import subprocess
 
 active_violators = {}
 active_strangers = {}
 blacklist_dict = {}
 whitelist_dict = {}
 iprange = '192.168.1.0/24'
-scan_retries = 10
+scan_retries = 3
 scan_timeout = 3
 
 
@@ -46,7 +46,7 @@ def update_config_dict(conf_file, global_list):
 
 def find_blacklisters():
     """Initiates and determines if blacklisted hosts are active."""
-    violators_found = blacklist_scanner_scapy()
+    violators_found = blacklist_scanner()
     scan_time = time.time()
 
     # Add any new online host to dictionary.
@@ -90,7 +90,7 @@ def find_blacklisters():
 #     return violators
 
 
-def blacklist_scanner_scapy():
+def blacklist_scanner():
     """With scapy, scans and returns blacklisted hosts active on network."""
     violators = {}
     collection = []
@@ -114,7 +114,7 @@ def blacklist_scanner_scapy():
 
 def find_strangers():
     """Initiates and determines if unknown hosts are active on network."""
-    strangers_found = host_scanner_scapy()
+    strangers_found = host_scanner()
     scan_time = time.time()
 
     # Add any new strangers to dictionary.
@@ -160,7 +160,7 @@ def find_strangers():
 #     return online_hosts
 
 
-def host_scanner_scapy():
+def host_scanner():
     """With scapy, return all online hosts."""
     online_strangers = {}
     collection = []
