@@ -219,7 +219,7 @@ def main():
             update_configs()
             find_blacklisters()
             find_strangers()
-            time.sleep(15)  # Wait for 1 minute
+            time.sleep(60)  # Wait for 1 minute
     except KeyboardInterrupt:
         print("\nUser aborted.")
     finally:
