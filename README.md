@@ -1,7 +1,7 @@
 # nemeses
 ## What is nemeses?
 A Python script to detect/log blacklisted hosts on a network, as well as unknown devices.
-Designed to work on Linux.
+Written and designed to work on Linux.
 
 This package includes two configuration files:
 * blacklist.conf
