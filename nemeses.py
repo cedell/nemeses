@@ -4,7 +4,7 @@ import time
 import re
 import sys
 from scapy.all import srp
-from scapy.all import Ether, ARP, conf, arping
+from scapy.all import Ether, ARP, conf
 # import io
 # import subprocess
 
@@ -13,8 +13,9 @@ active_strangers = {}
 blacklist_dict = {}
 whitelist_dict = {}
 iprange = '192.168.1.0/24'
-scan_retries = 3
-scan_timeout = 3
+scan_retries = 5
+scan_timeout = 6
+wait_loop = 90
 
 
 def update_configs():
@@ -74,11 +75,11 @@ def find_blacklisters():
     for host in hosts_to_remove:
         del active_violators[host]
 
-
+# Replaced with scapy version of function
 # def blacklist_scanner_arp-scan():
 #     """Scans network for blacklisted MACs and returns those active hosts."""
 #     violators = {}
-#     system_command = 'sudo arp-scan --retry={} --localnet'.format(scan_retries)
+#     system_command = 'sudo arp-scan --retry=10 --localnet'
 #     p = subprocess.Popen(system_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 #
 #     for line in io.TextIOWrapper(p.stdout, encoding="utf-8"):
@@ -143,10 +144,11 @@ def find_strangers():
         del active_strangers[host]
 
 
+# Replaced with scapy version of function
 # def host_scanner_arp-scan():
 #     """Collect information for all online hosts."""
 #     online_hosts = {}
-#     system_command = 'sudo arp-scan --verbose --retry={} --localnet'.format(scan_retries)
+#     system_command = 'sudo arp-scan --verbose --retry=10 --localnet'
 #     p = subprocess.Popen(system_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 #
 #     for line in io.TextIOWrapper(p.stdout, encoding="utf-8"):
@@ -219,10 +221,11 @@ def main():
             update_configs()
             find_blacklisters()
             find_strangers()
-            time.sleep(60)  # Wait for 1 minute
+            time.sleep(wait_loop)  # Wait for 1 minute
     except KeyboardInterrupt:
         print("\nUser aborted.")
     finally:
+        # TODO: Send summary of active hosts online durations to log
         send_to_log("--------------------- nemeses ended ---------------------")
 
 
