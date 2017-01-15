@@ -76,6 +76,7 @@ def find_blacklisters():
     for host in hosts_to_remove:
         del active_violators[host]
 
+
 # Replaced with scapy version of function
 # def blacklist_scanner_arpscan():
 #     """Scans network for blacklisted MACs and returns those active hosts."""
