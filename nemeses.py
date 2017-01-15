@@ -12,7 +12,8 @@ active_violators = {}
 active_strangers = {}
 blacklist_dict = {}
 whitelist_dict = {}
-iprange = '192.168.1.0/24'
+log_file = 'nemeses.log'
+ip_range = '192.168.1.0/24'
 scan_retries = 5
 scan_timeout = 6
 wait_loop = 90
@@ -32,7 +33,7 @@ def update_config_dict(conf_file, global_list):
         latest_dict = {}
         for line in file:
             # Skip lines with comment hash
-            if line[:1] == "#":
+            if line[:1] == '#':
                 continue
             # Regex to collapse tabs, strip newline, and then split by tabs.
             line_values = re.sub('\t\t+', '\t', line).rstrip('\n').split('\t')
@@ -76,7 +77,7 @@ def find_blacklisters():
         del active_violators[host]
 
 # Replaced with scapy version of function
-# def blacklist_scanner_arp-scan():
+# def blacklist_scanner_arpscan():
 #     """Scans network for blacklisted MACs and returns those active hosts."""
 #     violators = {}
 #     system_command = 'sudo arp-scan --retry=10 --localnet'
@@ -96,13 +97,13 @@ def blacklist_scanner():
     violators = {}
     collection = []
     try:
-        ans, _ = srp(Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=iprange), retry=scan_retries, timeout=scan_timeout)
+        ans, _ = srp(Ether(dst='ff:ff:ff:ff:ff:ff') / ARP(pdst=ip_range), retry=scan_retries, timeout=scan_timeout)
     except PermissionError:
         print('Please run with elevated permissions.')
         sys.exit(1)
 
     for snd, rcv in ans:
-        result = rcv.sprintf(r"%ARP.psrc% %Ether.src%").split()
+        result = rcv.sprintf(r'%ARP.psrc% %Ether.src%').split()
         collection.append(result)
 
     for mac, name in blacklist_dict.items():
@@ -145,7 +146,7 @@ def find_strangers():
 
 
 # Replaced with scapy version of function
-# def host_scanner_arp-scan():
+# def host_scanner_arpscan():
 #     """Collect information for all online hosts."""
 #     online_hosts = {}
 #     system_command = 'sudo arp-scan --verbose --retry=10 --localnet'
@@ -167,13 +168,13 @@ def host_scanner():
     online_strangers = {}
     collection = []
     try:
-        ans, _ = srp(Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=iprange), retry=scan_retries, timeout=scan_timeout)
+        ans, _ = srp(Ether(dst='ff:ff:ff:ff:ff:ff') / ARP(pdst=ip_range), retry=scan_retries, timeout=scan_timeout)
     except PermissionError:
         print('Please run with elevated permissions.')
         sys.exit(1)
 
     for snd, rcv in ans:
-        result = rcv.sprintf(r"%ARP.psrc% %Ether.src%").split()
+        result = rcv.sprintf(r'%ARP.psrc% %Ether.src%').split()
         collection.append(result)
 
     for host in collection:
@@ -185,13 +186,16 @@ def host_scanner():
     return online_strangers
 
 
-def send_to_log(entry):
-    """Writes details to log file."""
-    # TODO: Implement python.logging?
-    timestamp = time.strftime("%a %x %I:%M %p - ")
-    log_file = "nemeses.log"
-    with open(log_file, "a") as f:
-        f.write('{}{}\n'.format(timestamp, entry))
+def send_to_log(msg):
+    """Writes message to log file."""
+    timestamp = time.strftime('%a %x %I:%M %p - ')
+    with open(log_file, 'a') as f:
+        f.write('{}{}\n'.format(timestamp, msg))
+
+
+# TODO: Generate daily summary in log, showing each device's total time online.
+def daily_totals():
+    pass
 
 
 # Future functionality
@@ -208,25 +212,20 @@ def send_to_log(entry):
 #     p = subprocess.Popen(system_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 
-# Future functionality
-# Generate a summary for log file, showing each device active for the day and the total time online.
-# def daily_totals():
-#     pass
-
-
 def main():
-    send_to_log("--------------------- nemeses start ---------------------")
+    send_to_log('--------------------- nemeses start ---------------------')
     try:
         while True:
             update_configs()
             find_blacklisters()
             find_strangers()
-            time.sleep(wait_loop)  # Wait for 1 minute
+            daily_totals()
+            time.sleep(wait_loop)
     except KeyboardInterrupt:
-        print("\nUser aborted.")
+        print('\nUser aborted.')
     finally:
-        # TODO: Send summary of active hosts online durations to log
-        send_to_log("--------------------- nemeses ended ---------------------")
+        daily_totals()
+        send_to_log('--------------------- nemeses ended ---------------------')
 
 
 if __name__ == '__main__':
